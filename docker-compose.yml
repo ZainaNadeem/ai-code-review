@@ -1,4 +1,21 @@
 services:
+  db:
+    image: postgres:16-alpine
+    container_name: ai-code-review-db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=ai_code_review
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ai_code_review"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   server:
     build:
       context: ./server
@@ -8,11 +25,15 @@ services:
       - "8000:8000"
     environment:
       - PYTHONUNBUFFERED=1
+      - DATABASE_URL=postgresql+psycopg2://postgres:postgres@db:5432/ai_code_review
     env_file:
       - ./server/.env
     volumes:
       - ./server:/app
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      db:
+        condition: service_healthy
 
   client:
     build:
@@ -31,3 +52,6 @@ services:
     command: npm run dev -- --host 0.0.0.0
     depends_on:
       - server
+
+volumes:
+  pg_data:

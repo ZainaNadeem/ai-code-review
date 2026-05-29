@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker --version)",
+      "Bash(python3 -m venv .venv)",
+      "Bash(.venv/bin/pip -q install --upgrade pip)",
+      "Bash(.venv/bin/pip -q install sqlalchemy==2.0.36 alembic==1.14.0 psycopg2-binary==2.9.10 pydantic-settings==2.6.1)",
+      "Bash(.venv/bin/alembic --version)"
+    ]
+  }
+}
