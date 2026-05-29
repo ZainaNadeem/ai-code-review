@@ -22,6 +22,7 @@ from app.config import settings
 from app.db.session import SessionLocal
 from app.models.review import Review
 from app.models.review_comment import ReviewComment
+from app.rag import retrieve
 
 logger = logging.getLogger(__name__)
 
@@ -181,15 +182,33 @@ def _safe_int(value: object) -> int | None:
         return None
 
 
+def _build_system_prompt(chunk: str) -> str:
+    """Augment the base prompt with retrieved style-guide context (RAG)."""
+    context_chunks = retrieve(chunk, k=3)
+    if not context_chunks:
+        return SYSTEM_PROMPT
+    context = "\n\n---\n\n".join(context_chunks)
+    return (
+        SYSTEM_PROMPT
+        + "\n\nUse the following project coding style guide excerpts as "
+        "authoritative context. Flag code that violates them and reference "
+        f"the relevant rule in your comment:\n\n{context}"
+    )
+
+
 def review_chunk(
     client: OpenAI, model: str, file_path: str, chunk: str
 ) -> list[dict]:
-    """Send one diff chunk to OpenAI and return the parsed comment dicts."""
+    """Send one diff chunk to OpenAI and return the parsed comment dicts.
+
+    The system prompt is augmented with style-guide context retrieved for this
+    specific diff chunk (RAG).
+    """
     response = client.chat.completions.create(
         model=model,
         response_format={"type": "json_object"},
         messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "system", "content": _build_system_prompt(chunk)},
             {"role": "user", "content": f"File: {file_path}\n\nDiff:\n{chunk}"},
         ],
     )

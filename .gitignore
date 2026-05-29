@@ -74,3 +74,6 @@ docker-compose.override.yml
 
 # ---------- Personal notes ----------
 WALKTHROUGH.md
+
+# ---------- RAG index artifacts (generated) ----------
+server/data/

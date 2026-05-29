@@ -9,3 +9,5 @@ psycopg2-binary==2.9.10
 alembic==1.14.0
 openai==1.57.4
 tiktoken==0.8.0
+numpy==1.26.4
+faiss-cpu==1.9.0
