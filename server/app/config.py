@@ -15,5 +15,9 @@ class Settings(BaseSettings):
         "postgresql+psycopg2://postgres:postgres@localhost:5432/ai_code_review"
     )
 
+    # Shared secret configured on the GitHub webhook; used to verify the
+    # HMAC-SHA256 signature of incoming payloads.
+    github_webhook_secret: str = ""
+
 
 settings = Settings()
