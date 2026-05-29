@@ -1,0 +1,33 @@
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: ai-code-review-server
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - ./server/.env
+    volumes:
+      - ./server:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: ai-code-review-client
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    env_file:
+      - ./client/.env
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    command: npm run dev -- --host 0.0.0.0
+    depends_on:
+      - server

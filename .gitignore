@@ -1,0 +1,73 @@
+# ---------- Environment ----------
+.env
+.env.*
+!.env.example
+*.local
+
+# ---------- Node / Client ----------
+node_modules/
+.npm/
+.yarn/
+.pnp.*
+.pnpm-store/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Vite / build output
+dist/
+dist-ssr/
+build/
+.vite/
+*.tsbuildinfo
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+*.swp
+
+# Test / coverage
+coverage/
+.nyc_output/
+
+# ---------- Python / Server ----------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual envs
+.venv/
+venv/
+env/
+ENV/
+.python-version
+
+# Packaging / build
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+pip-wheel-metadata/
+
+# Tooling
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.tox/
+.coverage
+.coverage.*
+htmlcov/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# ---------- Docker ----------
+*.pid
+docker-compose.override.yml
