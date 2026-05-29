@@ -8,8 +8,8 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.models.repo import Repo
 from app.models.review import Review
+from app.review_pipeline import run_review
 from app.security import verify_github_signature
-from app.services.review_processor import process_review
 
 logger = logging.getLogger(__name__)
 
@@ -50,8 +50,6 @@ async def github_webhook(
     repository = payload["repository"]
 
     pr_number = pull_request["number"]
-    pr_title = pull_request["title"]
-    diff_url = pull_request["diff_url"]
     repo_name = repository["full_name"]
     repo_url = repository["html_url"]
 
@@ -67,7 +65,7 @@ async def github_webhook(
     db.refresh(review)
 
     # Hand off the heavy work; this runs after the response is sent.
-    background_tasks.add_task(process_review, review.id, diff_url, pr_title)
+    background_tasks.add_task(run_review, review.id)
 
     logger.info(
         "Queued review %s for PR #%s in '%s'", review.id, pr_number, repo_name

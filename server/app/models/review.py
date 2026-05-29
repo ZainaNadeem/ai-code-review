@@ -21,3 +21,6 @@ class Review(Base):
     summary: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     repo: Mapped["Repo"] = relationship(back_populates="reviews")
+    comments: Mapped[list["ReviewComment"]] = relationship(
+        back_populates="review", cascade="all, delete-orphan"
+    )

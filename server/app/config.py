@@ -19,5 +19,16 @@ class Settings(BaseSettings):
     # HMAC-SHA256 signature of incoming payloads.
     github_webhook_secret: str = ""
 
+    # Personal access token used to fetch PR diffs from the GitHub API.
+    # Required for private repos and to lift rate limits.
+    github_token: str = ""
+
+    # OpenAI credentials and model used by the review pipeline.
+    openai_api_key: str = ""
+    openai_model: str = "gpt-4o-mini"
+
+    # Maximum tokens per diff chunk sent to the model.
+    review_chunk_max_tokens: int = 3000
+
 
 settings = Settings()
