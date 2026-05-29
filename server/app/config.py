@@ -30,5 +30,10 @@ class Settings(BaseSettings):
     # Maximum tokens per diff chunk sent to the model.
     review_chunk_max_tokens: int = 3000
 
+    # JWT settings for authentication. JWT_SECRET must be set in production.
+    jwt_secret: str = ""
+    jwt_algorithm: str = "HS256"
+    access_token_expire_minutes: int = 60 * 24  # 1 day
+
 
 settings = Settings()

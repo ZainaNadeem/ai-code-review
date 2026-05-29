@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from app.routers import webhooks
+from app.routers import auth, repos, reviews, webhooks
 
 app = FastAPI(title="AI Code Review Assistant", version="0.1.0")
 
@@ -14,6 +14,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth.router)
+app.include_router(repos.router)
+app.include_router(reviews.router)
 app.include_router(webhooks.router)
 
 
