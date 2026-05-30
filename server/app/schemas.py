@@ -1,6 +1,10 @@
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, EmailStr
+
+# Allowed review lifecycle states (see review_pipeline.run_review).
+ReviewStatus = Literal["pending", "processing", "complete", "failed"]
 
 
 # --------------------------------------------------------------------------- #
@@ -34,7 +38,8 @@ class Token(BaseModel):
 # --------------------------------------------------------------------------- #
 class RepoCreate(BaseModel):
     github_repo_url: str
-    name: str
+    # Optional; derived from the URL's "owner/repo" path when omitted.
+    name: str | None = None
 
 
 class RepoRead(BaseModel):
@@ -72,3 +77,7 @@ class ReviewRead(BaseModel):
 
 class ReviewDetail(ReviewRead):
     comments: list[ReviewCommentRead] = []
+
+
+class ReviewStatusUpdate(BaseModel):
+    status: ReviewStatus

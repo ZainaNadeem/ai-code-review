@@ -1,3 +1,5 @@
+from urllib.parse import urlparse
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -11,6 +13,14 @@ from app.schemas import RepoCreate, RepoRead
 router = APIRouter(prefix="/repos", tags=["repos"])
 
 
+def _name_from_url(url: str) -> str:
+    """Derive a display name ("owner/repo") from a GitHub URL."""
+    path = urlparse(url).path.strip("/")
+    if path.endswith(".git"):
+        path = path[:-4]
+    return path or url
+
+
 @router.post("", response_model=RepoRead, status_code=status.HTTP_201_CREATED)
 def create_repo(
     payload: RepoCreate,
@@ -20,7 +30,7 @@ def create_repo(
     repo = Repo(
         user_id=current_user.id,
         github_repo_url=payload.github_repo_url,
-        name=payload.name,
+        name=payload.name or _name_from_url(payload.github_repo_url),
     )
     db.add(repo)
     db.commit()
