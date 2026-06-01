@@ -1,23 +1,40 @@
-import { useEffect, useState } from "react";
+import type { ReactElement } from "react";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { isAuthenticated } from "./api/auth";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Dashboard from "./pages/Dashboard";
+import ReviewDetail from "./pages/ReviewDetail";
 
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+function RequireAuth({ children }: { children: ReactElement }) {
+  return isAuthenticated() ? children : <Navigate to="/login" replace />;
+}
 
 export default function App() {
-  const [status, setStatus] = useState<string>("checking...");
-
-  useEffect(() => {
-    fetch(`${API_URL}/health`)
-      .then((r) => r.json())
-      .then((data) => setStatus(data.status ?? "unknown"))
-      .catch(() => setStatus("unreachable"));
-  }, []);
-
   return (
-    <main>
-      <h1>AI Code Review Assistant</h1>
-      <p>
-        Server status: <strong>{status}</strong>
-      </p>
-    </main>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route
+          path="/dashboard"
+          element={
+            <RequireAuth>
+              <Dashboard />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/reviews/:id"
+          element={
+            <RequireAuth>
+              <ReviewDetail />
+            </RequireAuth>
+          }
+        />
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
