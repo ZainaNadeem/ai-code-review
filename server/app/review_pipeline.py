@@ -19,6 +19,7 @@ import httpx
 from openai import OpenAI
 
 from app.config import settings
+from app.connections import manager
 from app.db.session import SessionLocal
 from app.models.review import Review
 from app.models.review_comment import ReviewComment
@@ -274,6 +275,16 @@ def run_review(review_id: int) -> None:
         db.commit()
         logger.info(
             "Review %s complete: %s comment(s)", review_id, total_comments
+        )
+
+        # Notify any subscribed WebSocket clients that the review is done.
+        manager.broadcast_threadsafe(
+            review.id,
+            {
+                "review_id": review.id,
+                "status": "complete",
+                "comment_count": total_comments,
+            },
         )
     except Exception:
         logger.exception("Review %s failed", review_id)
