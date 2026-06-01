@@ -1,17 +1,17 @@
 services:
-  db:
-    image: postgres:16-alpine
+  postgres:
+    image: postgres:15
     container_name: ai-code-review-db
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=ai_code_review
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d ai_code_review"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -21,18 +21,20 @@ services:
       context: ./server
       dockerfile: Dockerfile
     container_name: ai-code-review-server
+    # Pass every variable in the root .env through to the container.
+    env_file:
+      - .env
+    environment:
+      PYTHONUNBUFFERED: "1"
+      # Built from the POSTGRES_* values; host is the postgres service name.
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
     ports:
       - "8000:8000"
-    environment:
-      - PYTHONUNBUFFERED=1
-      - DATABASE_URL=postgresql+psycopg2://postgres:postgres@db:5432/ai_code_review
-    env_file:
-      - ./server/.env
     volumes:
       - ./server:/app
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     depends_on:
-      db:
+      postgres:
         condition: service_healthy
 
   client:
@@ -40,12 +42,10 @@ services:
       context: ./client
       dockerfile: Dockerfile
     container_name: ai-code-review-client
+    environment:
+      VITE_API_URL: http://localhost:8000
     ports:
       - "5173:5173"
-    environment:
-      - VITE_API_URL=http://localhost:8000
-    env_file:
-      - ./client/.env
     volumes:
       - ./client:/app
       - /app/node_modules
